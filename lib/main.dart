@@ -31,10 +31,28 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var visibleModalDelete = false;
   Future<int> future;
-  var data = [];
+  List data = [];
   var dataAll = [];
   int visible = 0;
   Timer _debounce;
+  ScrollController _controller;
+  var colorSearch = Colors.transparent;
+  var offsetSearch = 100.0;
+
+  _scrollListener() {
+    if (_controller.offset >= 200 ) {
+      setState(() {
+        colorSearch = Colors.white;
+//        offsetSearch = 0.0;
+      });
+
+    }else{
+      setState(() {
+        colorSearch = Colors.transparent;
+//        offsetSearch = 100.0;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -42,28 +60,28 @@ class _MyHomePageState extends State<MyHomePage> {
       {
         "id": 1,
         "name": "Tiep",
-        "gender": 1,
+        "gender": "1",
         "avatar": "",
         "relationship": "alone"
       },
       {
         "id": 2,
         "name": "Hanh",
-        "gender": 2,
+        "gender": "2",
         "avatar": "",
         "relationship": "dating"
       },
       {
         "id": 3,
         "name": "Hanh",
-        "gender": 2,
+        "gender": "2",
         "avatar": "",
         "relationship": "alone"
       },
       {
         "id": 4,
         "name": "Tuan Anh",
-        "gender": 1,
+        "gender": "1",
         "avatar": "",
         "relationship": "dating"
       },
@@ -72,37 +90,40 @@ class _MyHomePageState extends State<MyHomePage> {
       {
         "id": 1,
         "name": "Tiep",
-        "gender": 1,
+        "gender": "1",
         "avatar": "",
         "relationship": "alone"
       },
       {
         "id": 2,
         "name": "Hanh",
-        "gender": 2,
+        "gender": "2",
         "avatar": "",
         "relationship": "dating"
       },
       {
         "id": 3,
         "name": "Hanh",
-        "gender": 2,
+        "gender": "2",
         "avatar": "",
         "relationship": "alone"
       },
       {
         "id": 4,
         "name": "Tuan Anh",
-        "gender": 1,
+        "gender": "1",
         "avatar": "",
         "relationship": "dating"
       },
     ];
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
     final width = MediaQuery.of(context).size.width;
     const timeout = const Duration(seconds: 2);
     if (visible < 1) {
@@ -114,13 +135,13 @@ class _MyHomePageState extends State<MyHomePage> {
         print('demoo timeout: $visible');
       });
     }
-    print('visible: $visible');
     return Scaffold(
 //      appBar: AppBar(
 //        title: Text(widget.title),
 //        backgroundColor: Colors.pink[600],
 //      ),
       body: CustomScrollView(
+        controller: _controller,
         slivers: <Widget>[
           SliverAppBar(
             expandedHeight: 300.0,
@@ -128,33 +149,41 @@ class _MyHomePageState extends State<MyHomePage> {
             pinned: true,
             backgroundColor: Colors.pink[600],
             title: Center(
-                child: Container(
-              width: width*0.8,
+//                child: Transform.translate(
+//
+//                  offset: Offset(0,offsetSearch),
+                  child: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              width: width * 0.8,
               padding: EdgeInsets.only(left: 10, right: 10),
               decoration: BoxDecoration(
-                borderRadius:  BorderRadius.circular(20.0),
-                color: Colors.white
-              ),
+                    borderRadius: BorderRadius.circular(20.0),
+                    color: colorSearch),
               child: Row(
-                children: <Widget>[
-                  Container(
-                    child: Icon(
-                      Icons.search,
-                      color: Colors.pink[600],
+                  children: <Widget>[
+                    Container(
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.pink[600],
+                      ),
+                      margin: EdgeInsets.only(right: 10),
                     ),
-                    margin: EdgeInsets.only(right: 10),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      style: TextStyle(color: Colors.pink[600]),
-                      onChanged: (string) => onChangeText(string),
-                      decoration: InputDecoration(
-                          border: InputBorder.none, hintText: 'Search account'),
+                    Expanded(
+                      child: TextField(
+                        style: TextStyle(color: Colors.pink[600]),
+                        onChanged: (string) => onChangeText(string),
+                        decoration: InputDecoration(
+                            border: InputBorder.none, hintText: 'Search account',
+                        ),
+
+                      ),
+
                     ),
-                  ),
-                ],
+                  ],
               ),
-            )),
+            ),
+//                )
+            ),
             flexibleSpace: FlexibleSpaceBar(
               background: Image.asset(
                 'images/background.jpg',
@@ -224,7 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Row(
               children: <Widget>[
                 Image.asset(
-                  item['gender'] == 1
+                  item['gender'] == "1"
                       ? 'images/ic_boy.png'
                       : 'images/ic_girl.png',
                   width: 60,
@@ -277,7 +306,7 @@ class _MyHomePageState extends State<MyHomePage> {
             fullscreenDialog: true));
     if (user != null) {
       var lst = data;
-      List editList = lst.map((e) {
+      var editList = lst.map((e) {
         if (e['name'] == user['old_name']) {
           print('item: $e');
           e = user;
