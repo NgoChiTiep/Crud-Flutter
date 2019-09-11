@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:just_debounce_it/just_debounce_it.dart';
 import 'package:crud/createAccount.dart';
 import 'package:flutter/material.dart';
 
@@ -28,11 +30,45 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var visibleModalDelete = false;
-  List<dynamic> data = [];
+  Future<int> future;
+  var data = [];
+  var dataAll = [];
+  int visible = 0;
+  Timer _debounce;
 
   @override
   void initState() {
     data = [
+      {
+        "id": 1,
+        "name": "Tiep",
+        "gender": 1,
+        "avatar": "",
+        "relationship": "alone"
+      },
+      {
+        "id": 2,
+        "name": "Hanh",
+        "gender": 2,
+        "avatar": "",
+        "relationship": "dating"
+      },
+      {
+        "id": 3,
+        "name": "Hanh",
+        "gender": 2,
+        "avatar": "",
+        "relationship": "alone"
+      },
+      {
+        "id": 4,
+        "name": "Tuan Anh",
+        "gender": 1,
+        "avatar": "",
+        "relationship": "dating"
+      },
+    ];
+    dataAll = [
       {
         "id": 1,
         "name": "Tiep",
@@ -67,50 +103,115 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    const timeout = const Duration(seconds: 2);
+    if (visible < 1) {
+      Timer(timeout, () {
+        setState(() {
+          visible++;
+          future = Future.value(visible);
+        });
+        print('demoo timeout: $visible');
+      });
+    }
+    print('visible: $visible');
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.pink[600],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Image.asset(
-              'images/background.jpg',
-              fit: BoxFit.cover,
+//      appBar: AppBar(
+//        title: Text(widget.title),
+//        backgroundColor: Colors.pink[600],
+//      ),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            expandedHeight: 300.0,
+            floating: true,
+            pinned: true,
+            backgroundColor: Colors.pink[600],
+            title: Center(
+                child: Container(
+              width: width*0.8,
+              padding: EdgeInsets.only(left: 10, right: 10),
+              decoration: BoxDecoration(
+                borderRadius:  BorderRadius.circular(20.0),
+                color: Colors.white
+              ),
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    child: Icon(
+                      Icons.search,
+                      color: Colors.pink[600],
+                    ),
+                    margin: EdgeInsets.only(right: 10),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      style: TextStyle(color: Colors.pink[600]),
+                      onChanged: (string) => onChangeText(string),
+                      decoration: InputDecoration(
+                          border: InputBorder.none, hintText: 'Search account'),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.asset(
+                'images/background.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
-            ListView.builder(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                shrinkWrap: true,
-                primary: false,
-                itemCount: data.length,
-                itemBuilder: (context, index) {
-                  return renderItem(data[index], index);
+          ),
+          SliverFillRemaining(
+            child: FutureBuilder(
+                future: future,
+                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                  print("snapshot.hasData:  ${snapshot.data}");
+                  return (snapshot.data != null && snapshot.data > 0)
+                      ? ListView.builder(
+                          padding: EdgeInsets.only(top: 10, bottom: 10),
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            return renderItem(data[index], index);
+                          })
+                      : renderLoading();
                 }),
-//            visibleModalDelete == true
-//                ? SimpleDialog(
-//                    title: const Text('Select assignment'),
-//                    children: <Widget>[
-//                      SimpleDialogOption(
-//                        child: const Text('Treasury department'),
-//                      ),
-//                      SimpleDialogOption(
-//                        child: const Text('State department'),
-//                      ),
-//                    ],
-//                  )
-//                : null
-          ],
-        ),
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.pink[600],
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+
+      floatingActionButton: Builder(
+        builder: (BuildContext context) => FloatingActionButton(
+          backgroundColor: Colors.pink[600],
+          onPressed: () => _incrementCounter(context),
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  renderLoading() {
+    return Center(
+      child: CircularProgressIndicator(
+        backgroundColor: Colors.pink[600],
+      ),
+    );
+  }
+
+  onChangeText(string) {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      print('list: $string');
+      var list = dataAll;
+      var listSearch = list.where(
+          (item) => item['name'].toLowerCase().contains(string.toLowerCase()));
+      setState(() {
+        data = listSearch.toList();
+      });
+    });
   }
 
   Widget renderItem(item, index) {
@@ -148,10 +249,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Row(
             children: <Widget>[
-              IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {},
-                color: Colors.blue[800],
+              Builder(
+                builder: (BuildContext context) => IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () => _editUser(context, item),
+                  color: Colors.blue[800],
+                ),
               ),
               IconButton(
                 icon: Icon(Icons.delete_forever),
@@ -164,6 +267,32 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+  }
+
+  Future _editUser(context, item) async {
+    var user = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreateAccount(user: item),
+            fullscreenDialog: true));
+    if (user != null) {
+      var lst = data;
+      List editList = lst.map((e) {
+        if (e['name'] == user['old_name']) {
+          print('item: $e');
+          e = user;
+        }
+        return e;
+      });
+      print('edit: $editList');
+      setState(() {
+        data = editList.toList();
+      });
+      Scaffold.of(context).showSnackBar(new SnackBar(
+        content: new Text("Edit Success!"),
+        backgroundColor: Colors.green,
+      ));
+    }
   }
 
   Future _askDelete(item) async {
@@ -197,7 +326,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _deleteAccount(item) {
-    var list = data.where((obj) => obj['id'] != item['id']).toList();
+    var list = data.where((obj) => obj['name'] != item['name']).toList();
     setState(() {
       data = list;
       visibleModalDelete = true;
@@ -205,23 +334,22 @@ class _MyHomePageState extends State<MyHomePage> {
     print('124: $list');
   }
 
-  void _incrementCounter() {
-    final router = new MaterialPageRoute<Null>(
-        builder: (context) {
-          return CreateAccount();
-        },
-        fullscreenDialog: true);
-    Navigator.push(context, router);
+  Future _incrementCounter(context) async {
+    Object user = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreateAccount(), fullscreenDialog: true));
+    print('user :$user');
+    if (user != null) {
+      var list = data;
+      list.add(user);
+      setState(() {
+        data = list;
+      });
+      Scaffold.of(context).showSnackBar(new SnackBar(
+        content: new Text("Create Success!"),
+        backgroundColor: Colors.green,
+      ));
+    }
   }
 }
-//SimpleDialog(
-//title: const Text('Select assignment'),
-//children: <Widget>[
-//SimpleDialogOption(
-//child: const Text('Treasury department'),
-//),
-//SimpleDialogOption(
-//child: const Text('State department'),
-//),
-//],
-//)
