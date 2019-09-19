@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class Header extends StatelessWidget{
-  Header({ this.Body, this.title});
-  Widget Body;
+  Header({ this.body, this.title});
+  Widget body;
   String title;
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class Header extends StatelessWidget{
             icon: Icon(
               Icons.arrow_back_ios,
               color: Colors.black,
-              size: 16,
+              size: 18,
             ),
             onPressed: () => Navigator.pop(context)),
         backgroundColor: Colors.white,
@@ -24,7 +24,7 @@ class Header extends StatelessWidget{
             icon: Icon(
               Icons.arrow_back_ios,
               color: Colors.white,
-              size: 16,
+              size: 18,
             ),
           )
         ],
@@ -33,12 +33,12 @@ class Header extends StatelessWidget{
             title,
             style: TextStyle(
               color: Colors.black,
-              fontSize: 16,
+              fontSize: 18,
             ),
           ),
         ),
       ),
-      body: Body,
+      body: body,
     );
   }
 }

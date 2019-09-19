@@ -7,7 +7,7 @@ class BonusPoint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Header(Body: BonusPointContent(),title: "Tặng điểm thưởng");
+    return Header(body: BonusPointContent(),title: "Tặng điểm thưởng");
   }
 }
 
@@ -28,8 +28,6 @@ class BonusPointState extends State<BonusPointContent> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-    print("load");
     // TODO: implement build
     return GestureDetector(
         onTap: () {
