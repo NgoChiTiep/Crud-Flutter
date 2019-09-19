@@ -1,10 +1,11 @@
+import 'package:crud/src/blocs/action_account_blocs.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
-class CreateAccount extends StatefulWidget {
+class ActionAccount extends StatefulWidget {
   var user = {};
 
-  CreateAccount({Key key, @required this.user}) : super(key: key);
+  ActionAccount({Key key, @required this.user}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -13,10 +14,11 @@ class CreateAccount extends StatefulWidget {
   }
 }
 
-class CreateAccountState extends State<CreateAccount> {
-  String userName = '';
+class CreateAccountState extends State<ActionAccount> {
+  TextEditingController userName = new TextEditingController();
   String gender;
-  String relationship = '';
+  TextEditingController relationship = new TextEditingController();
+  ActionAccountBloc bloc = new ActionAccountBloc();
 
   List listGender = [
     {
@@ -28,6 +30,7 @@ class CreateAccountState extends State<CreateAccount> {
       "code": "2",
     }
   ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +51,7 @@ class CreateAccountState extends State<CreateAccount> {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
+
               Container(
                 child: Image.asset(
                   widget.user == null
@@ -79,14 +83,14 @@ class CreateAccountState extends State<CreateAccount> {
                     _inputRow(
                         'images/ic_username.png',
                         widget.user == null ? 'Username' : widget.user['name'],
-                        onChangeUserName),
+                        userName),
                     _inputGender(),
                     _inputRow(
                         'images/ic_relationship.png',
                         widget.user == null
                             ? 'Relationship'
                             : widget.user['relationship'],
-                        onChangeRelation),
+                        relationship),
                   ],
                 ),
               ),
@@ -150,7 +154,7 @@ class CreateAccountState extends State<CreateAccount> {
     );
   }
 
-  Widget _inputRow(icon, hint, onChangeText) {
+  Widget _inputRow(icon, hint, controller) {
     return Container(
       margin: EdgeInsets.only(bottom: 10),
       child: Row(
@@ -166,9 +170,13 @@ class CreateAccountState extends State<CreateAccount> {
           ),
           Expanded(
             child: TextField(
-              onChanged: (string) => onChangeText(string),
-              decoration:
-                  InputDecoration(border: InputBorder.none, hintText: hint),
+              maxLines: null,
+              controller: controller,
+              decoration: InputDecoration(
+
+                border: InputBorder.none,
+                hintText: hint,
+              ),
             ),
           ),
         ],
@@ -176,53 +184,48 @@ class CreateAccountState extends State<CreateAccount> {
     );
   }
 
-  _validate() {
-    if (userName == '') return 'Name may not be blank';
-    if (gender == null) return 'Gender may not be blank';
-    if (relationship == '') return 'Relationship may not be blank';
-    return '';
-  }
 
   onActionUser(context) {
-    if (_validate() == '') {
+    print('context: $context');
+    String mess = '';
+    bloc.validateStream.listen((data) {
+      print("DataReceived: " + data);
+      mess = data;
+    }, onDone: () {
+      print("Task Done");
+    }, onError: (error) {
+      print("Some Error");
+    });
+    if (bloc.isValidate(userName.text, gender, relationship.text)) {
       var user = {};
-      if(widget.user == null){
+      if (widget.user == null) {
         user = {
-          "name": userName,
+          "name": userName.text,
           "gender": gender,
           "avatar": "",
-          "relationship": relationship
+          "relationship": relationship.text
         };
-      }
-      else{
+      } else {
         user = {
-          "name": userName,
+          "name": userName.text,
           "gender": gender,
           "avatar": "",
           "old_name": widget.user["name"],
-          "relationship": relationship
+          "relationship": relationship.text
         };
       }
       Navigator.pop(context, user);
     } else {
       Scaffold.of(context).showSnackBar(new SnackBar(
-        content: new Text(_validate()),
+        content: StreamBuilder(
+            stream: bloc.validateStream,
+            builder: (BuildContext context, snapshot) {
+              print('snapshot: $context');
+              return Text(mess);
+            }),
         duration: Duration(seconds: 2),
         backgroundColor: Colors.pink[600],
       ));
     }
-  }
-
-  onChangeUserName(string) {
-    setState(() {
-      userName = string;
-    });
-    userName = string;
-  }
-
-  onChangeRelation(string) {
-    setState(() {
-      relationship = string;
-    });
   }
 }
