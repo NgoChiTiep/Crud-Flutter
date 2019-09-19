@@ -1,4 +1,5 @@
 import 'package:crud/src/component/header.dart';
+import 'package:crud/src/component/toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -122,6 +123,7 @@ class BonusPointState extends State<NewScreens> {
               ],
             ),
           ),
+
           Container(
             width: width,
             decoration: BoxDecoration(
@@ -142,33 +144,6 @@ class BonusPointState extends State<NewScreens> {
   }
 
   void _onPressBonusPoint(context) {
-    Scaffold.of(context).showSnackBar(new SnackBar(
-      content: Container(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey[300],
-                blurRadius: 5.0,
-                // has the effect of softening the shadow
-                spreadRadius: 5.0,
-                offset: new Offset(0.0, 0.0),
-              )
-            ]),
-        child: Row(
-          children: <Widget>[
-            Image.asset('images/ic_correct.png', width: 24, height: 24),
-            Container(
-              child: Text('Tặng điểm thành công!',
-                  style: TextStyle(color: Colors.black)),
-              margin: EdgeInsets.only(left: 15),
-            )
-          ],
-        ),
-      ),
-      backgroundColor: Colors.grey[100],
-    ));
+    Toast(context: context, title: 'Tặng điểm thành công').showToast();
   }
 }
