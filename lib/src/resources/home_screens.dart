@@ -128,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: CustomScrollView(
         controller: _controller,
         slivers: <Widget>[
+
           SliverAppBar(
             expandedHeight: 300.0,
             floating: true,
